@@ -19,19 +19,12 @@ public class EmailReceivedListener {
     @KafkaListener(topics = "${kafka.topic.sendEmail}")
     public void listen(ConsumerRecord<String, String> record) {
 
-        String key = record.key();
-        String value = record.value();
-
-        System.out.println("Received message: Key = " + key + ", Value = " + value);
         try {
-            SendEmailMessage message = jacksonObjectMapper.readValue(value, SendEmailMessage.class);
-            System.out.println("Subject: " + message.getSubject());
-            System.out.println("Body: " + message.getBody());
-            log.info("Subject: {}", message.getSubject());
-            log.info("Body: {}", message.getBody());
+            SendEmailMessage message = jacksonObjectMapper.readValue(record.value(), SendEmailMessage.class);
+            emailSenderService.processSendEmail(message);
 
-            // Обработка полученного сообщения
         } catch (Exception e) {
+            //TODO: IllegalArgumentException
             e.printStackTrace();
         }
     }

@@ -15,7 +15,7 @@ import org.springframework.data.elasticsearch.annotations.FieldType;
 @Document(indexName = "emails")
 public class Email {
     @Id
-    Long id;
+    private String id;
 
     @Field(type = FieldType.Keyword)
     private String from;

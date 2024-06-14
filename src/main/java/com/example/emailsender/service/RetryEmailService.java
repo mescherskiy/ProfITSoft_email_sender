@@ -17,7 +17,7 @@ public class RetryEmailService {
     private EmailRepository emailRepository;
 
     public void retryFailedEmails() {
-        List<Email> failedEmails = emailRepository.findByStatus("FAILED");
+        List<Email> failedEmails = emailRepository.findByStatusOrStatusIsNull("FAILED");
         for (Email email : failedEmails) {
             email.setAttemptCount(email.getAttemptCount() + 1);
             email.setLastAttemptTime(System.currentTimeMillis());

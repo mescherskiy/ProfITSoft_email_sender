@@ -6,13 +6,20 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - elasticsearch
-      - kafka
+      kafka:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
     networks:
       - app-network
     environment:
       - KAFKA_BROKER=kafka:9092
       - KAFKA_TOPIC=sendEmail
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   elasticsearch:
     image: elasticsearch:8.6.1
@@ -27,6 +34,11 @@ services:
       - "9200:9200"
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cat/health || exit 1" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   kibana:
     image: kibana:8.6.1
@@ -54,6 +66,11 @@ services:
       - zookeeper
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD", "kafka-topics.sh", "--list", "--zookeeper", "zookeeper:2181" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   kafdrop:
     image: obsidiandynamics/kafdrop
@@ -79,6 +96,11 @@ services:
       - ZOOKEEPER_TICK_TIME=2000
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
 networks:
   app-network:
